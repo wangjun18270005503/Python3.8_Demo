@@ -5,7 +5,7 @@
 # @Version：V 0.1
 # @File : auto_login.py
 # @desc : 实现系统自动登录
-# 数字化改革堡垒机——登录
+# 数字化改革堡垒机——登录 新
 '''
     通过 冰拓 识别
         URL：http://bingtop.com/account/login/
