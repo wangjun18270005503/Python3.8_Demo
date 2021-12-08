@@ -3,7 +3,11 @@
 # @Author : J.wang
 # @File : create.py
 
+<<<<<<< HEAD
 import pymysql,re
+=======
+import pymysql
+>>>>>>> origin/master
 
 
 def create_table(create_name, table_comment, column_comment):
@@ -11,6 +15,7 @@ def create_table(create_name, table_comment, column_comment):
     try:
         db = pymysql.Connect(host='127.0.0.1', user='root', password='159611', port=3306, database='python_mysql')
         cursor = db.cursor()
+<<<<<<< HEAD
 
 
         table_exists_sql = "SHOW TABLES;"
@@ -37,6 +42,28 @@ def create_table(create_name, table_comment, column_comment):
             print(sql_create_table)
             cursor.execute(sql_create_table)
             db.commit()
+=======
+        cursor.execute("DROP TABLE IF EXISTS "+create_name)
+        print(cursor.rowcount)
+        # column_comment = """
+        # `identity_card` varchar(100) NOT NULL DEFAULT '' COMMENT '',
+        # `name` varchar(100) NOT NULL DEFAULT '' COMMENT '',
+        # `input_cardId` varchar(100) NOT NULL DEFAULT '' COMMENT '',
+        # """
+        sql_create_table = "CREATE TABLE if not exists "+create_name+"""
+                (`id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',"""+column_comment+"""       
+                `remarks` varchar(100) NOT NULL DEFAULT '' COMMENT '备注',
+                `update_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+                `update_by` varchar(60) NOT NULL DEFAULT '1',
+                `create_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                `create_by` varchar(60) NOT NULL DEFAULT '1',
+                `del_flag` char(1) NOT NULL DEFAULT '0' COMMENT '0正常，1删除',
+                PRIMARY KEY (`id`)
+                 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='"""+table_comment+"';"
+        print(sql_create_table)
+        cursor.execute(sql_create_table)
+        db.commit()
+>>>>>>> origin/master
         print(cursor.rowcount)
     except pymysql.Error as e:
         print("数据库连接失败：" + str(e))
@@ -57,21 +84,34 @@ def dict_column_comment(create_name, table_comment, columns, dict_name):
     create_table(create_name, table_comment, column_str)
     return column_str
 
+<<<<<<< HEAD
 def list_column_comment(create_name, table_comment, columns, dict_name):
+=======
+def list_column_comment(columns):
+>>>>>>> origin/master
     print(type(columns))
     print(columns)
     return ",".join("'"+str(columns[i]+"' varchar(100) NOT NULL DEFAULT '' COMMENT ''") for i in range(len(columns)))
 
+<<<<<<< HEAD
 def fordict(create_name, table_comment, for_dict, key_name):
     print('通用建表 dict!!!')
     print('dict --------start--------')
     if key_name != '': key_name = '_'+key_name
     column_str = dict_column_comment(create_name, table_comment, for_dict, key_name)  # 组合sql
+=======
+def fordict(create_name,table_comment,for_dict,key_name):
+    print('通用建表 dict!!!')
+    print('dict --------start--------')
+    if key_name != '' : key_name =  '_'+key_name
+    column_str = dict_column_comment(create_name,table_comment,for_dict,key_name)  # 组合sql
+>>>>>>> origin/master
     print(column_str)
     for dd in for_dict.keys():
         table_name_last = '_'+dd
         if isinstance(for_dict[dd], dict):  # 判断是否为字典
             print('dict》》dict--------start--------')
+<<<<<<< HEAD
             print(dict_column_comment(create_name, table_comment, for_dict[dd], table_name_last))
             print(for_dict[dd])
             fordict(create_name, table_comment, for_dict[dd], dd)
@@ -79,16 +119,33 @@ def fordict(create_name, table_comment, for_dict, key_name):
             print('dict》》list--------start--------')
             print(dict_column_comment(create_name, table_comment, for_dict[dd][0], table_name_last))
             fordict(create_name, table_comment, for_dict[dd][0], dd)
+=======
+            print(dict_column_comment(create_name,table_comment,for_dict[dd],table_name_last))
+            print(for_dict[dd])
+            fordict(create_name,table_comment,for_dict[dd],dd)
+        elif isinstance(for_dict[dd], list):
+            print('dict》》list--------start--------')
+            print(dict_column_comment(create_name,table_comment,for_dict[dd][0],table_name_last))
+            fordict(create_name,table_comment,for_dict[dd][0],dd)
+>>>>>>> origin/master
         else:
             print('当前不进行解析！' + dd)
             # return
     print('dict -------- end --------')
 
+<<<<<<< HEAD
 def fordata(create_name, table_comment, contents):
     for key in contents.keys():
         # 判断是否为列表
         if (key == 'datas' or key == 'data') and isinstance(contents[key], list):
             fordict(create_name, table_comment, contents[key][0], '')
+=======
+def fordata(create_name,table_comment,contents):
+    for key in contents.keys():
+        # 判断是否为列表
+        if (key == 'datas' or key == 'data') and isinstance(contents[key], list):
+            fordict(create_name,table_comment,contents[key][0],'')
+>>>>>>> origin/master
 
             # todo --------------------------------------------------------
             # print(dict_column_comment(contents[key][0]))
@@ -105,7 +162,11 @@ def fordata(create_name, table_comment, contents):
 
         # 判断 是否为字典
         if (key == 'datas' or key == 'data') and isinstance(contents[key], dict):
+<<<<<<< HEAD
             fordict(create_name, table_comment, contents[key], '')
+=======
+            fordict(create_name,table_comment,contents[key],'')
+>>>>>>> origin/master
 
             # todo --------------------------------------------------------
             # column_str = dict_column_comment(contents[key])  # 组合sql
@@ -140,5 +201,9 @@ if __name__ == "__main__":
     str_object_object_object = {'code':'00','msg':'成功','data':{'address':'浙江省江山市廿八都镇枫岭路２号','gender':'男','nation':'汉族','birth_date':'1953-02-20','disable_leve':'三级','disable_type':'肢体残疾','disable_card':'33082319530220891343','name':'吴享根','sys_area_street':{'street_name': '清湖街道','street_code': '330881103000','sys_area_village':{'village_name': '蔡家村','village_code': '330881003213'}}},'dataCount':1,'requestId':'b6529'}
     print(type(str_object_object_object))
     print(type(str_object_object_object['data']))
+<<<<<<< HEAD
     fordata(create_name, table_comment, str_object_object_object)
+=======
+    fordata(create_name,table_comment,str_object_object_object)
+>>>>>>> origin/master
     # # create_table(create_name, table_comment)
