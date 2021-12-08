@@ -20,7 +20,8 @@ def table_exists(con, table_name):  # 这个函数用来判断表是否存在
         return 0  # 不存在返回0
 
 
-connect = pymysql.connect(user='root', password='159611', host='127.0.0.1', database='python_mysql', port=3306, charset='utf8')
+connect = pymysql.connect(user='root', password='159611', host='127.0.0.1', database='python_mysql', port=3306,
+                          charset='utf8')
 con = connect.cursor()
 con.execute(sql)
 table_name = 'animal'
