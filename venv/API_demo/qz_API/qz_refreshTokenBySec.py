@@ -29,7 +29,8 @@ def str_md5(str = ''):
     return  md.hexdigest()
 
 # 定义方法传参形式
-def refreshTokenByKey(url,appKey,appSecret):
+def refreshTokenBySec(url,appKey):
+    appSecret = r['refreshSecret']
     # 打印参数信息
     print('url：'+url+'\nappKey：'+appKey+'\nappSecret：'+appSecret)
     # todo 准备参数
@@ -52,6 +53,6 @@ def refreshTokenByKey(url,appKey,appSecret):
 if __name__ == "__main__":
     url = 'https://dw.qz.gov.cn/gateway/app/refreshTokenBySec.htm?'
     appKey = '46eb7734001641048cd20cf15f18610a'
-    appSecret = r['refreshSecret']
-    refreshTokenByKey(url,appKey,appSecret)
+    # appSecret = r['refreshSecret']
+    refreshTokenBySec(url,appKey)
 

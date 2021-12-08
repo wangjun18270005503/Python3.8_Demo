@@ -3,7 +3,7 @@
 # @Author : J.wang
 # @File : create.py
 
-import pymysql
+import pymysql,re
 
 
 def create_table(create_name, table_comment, column_comment):
@@ -11,26 +11,32 @@ def create_table(create_name, table_comment, column_comment):
     try:
         db = pymysql.Connect(host='127.0.0.1', user='root', password='159611', port=3306, database='python_mysql')
         cursor = db.cursor()
-        cursor.execute("DROP TABLE IF EXISTS "+create_name)
-        print(cursor.rowcount)
-        # column_comment = """
-        # `identity_card` varchar(100) NOT NULL DEFAULT '' COMMENT '',
-        # `name` varchar(100) NOT NULL DEFAULT '' COMMENT '',
-        # `input_cardId` varchar(100) NOT NULL DEFAULT '' COMMENT '',
-        # """
-        sql_create_table = "CREATE TABLE if not exists "+create_name+"""
-                (`id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',"""+column_comment+"""       
-                `remarks` varchar(100) NOT NULL DEFAULT '' COMMENT '备注',
-                `update_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
-                `update_by` varchar(60) NOT NULL DEFAULT '1',
-                `create_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-                `create_by` varchar(60) NOT NULL DEFAULT '1',
-                `del_flag` char(1) NOT NULL DEFAULT '0' COMMENT '0正常，1删除',
-                PRIMARY KEY (`id`)
-                 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='"""+table_comment+"';"
-        print(sql_create_table)
-        cursor.execute(sql_create_table)
-        db.commit()
+
+
+        table_exists_sql = "SHOW TABLES;"
+        cursor.execute(table_exists_sql)
+        table_exists_list = cursor.fetchall()
+        table_list = re.findall('(\'.*?\')', str(table_exists_list))
+        table_list = [re.sub("'", '', each) for each in table_list]
+        print('\033[0;33;40m\ttable_exists_list：\033[0m',table_exists_list)
+        # cursor.execute("DROP TABLE IF EXISTS " + create_name)
+        if create_name in table_list:
+            print('\033[0;33;40m\telse 存在：\033[0m',0)
+        else:
+            print('\033[0;33;40m\telse 不存在：\033[0m',0)
+            sql_create_table = "CREATE TABLE if not exists " + create_name + """
+                                (`id` int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',""" + column_comment + """
+                                `remarks` varchar(100) NOT NULL DEFAULT '' COMMENT '备注',
+                                `update_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '修改时间',
+                                `update_by` varchar(60) NOT NULL DEFAULT '1',
+                                `create_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                `create_by` varchar(60) NOT NULL DEFAULT '1',
+                                `del_flag` char(1) NOT NULL DEFAULT '0' COMMENT '0正常，1删除',
+                                PRIMARY KEY (`id`)
+                                 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COMMENT='""" + table_comment + "';"
+            print(sql_create_table)
+            cursor.execute(sql_create_table)
+            db.commit()
         print(cursor.rowcount)
     except pymysql.Error as e:
         print("数据库连接失败：" + str(e))
