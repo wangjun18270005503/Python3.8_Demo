@@ -2,6 +2,7 @@
 # @Time : 2021/12/9 13:01
 # @Author : J.wang
 # @File : py_thread_demo2.py
+
 '''
     (1) 接受外部传入参数： url：接口地址、appKey：应用key、appSecret：应用appSecret、loop_table_name：loop循环表、
                             create_name：需要创建对应的表名称、*params：param1、param2 接口循环入参参数英文名称
