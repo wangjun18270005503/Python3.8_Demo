@@ -7,7 +7,7 @@
                             create_name：需要创建对应的表名称、*params：param1、param2 接口循环入参参数英文名称
     (2) 发送接口请求：if签名错误：调用刷新密钥接口。
     (3) 请求成功：try：if create_name 已存在：数据插入 elif: 实现自动建表,插入数据  except e: finally: db.close() | cursor.close()
-    (4) 附带线程查询数据
+    (4) 附带线程并发请求数据
 '''
 from concurrent.futures import ThreadPoolExecutor
 import threading
@@ -21,12 +21,11 @@ print('当前请求时间戳（毫秒）：' + requestTime)
 r = redis.Redis(host='localhost', port=6379, db=1, decode_responses=True)
 
 
-def split_list(valuesList,keyslist):
+def split_list(valuesList, keyslist):
     # 线程列表
     new_value_list = []
     count_list = []
     keys_list = []
-    print('\033[0;34;43m--待循环参数 keyslist：--\033[0m', keyslist,type(keyslist))
     # 每个线程处理的数据大小
     split_count = 1
     # 需要的线程个数
@@ -37,25 +36,22 @@ def split_list(valuesList,keyslist):
         value_list = valuesList[count: count + split_count]
         # print('\033[0;34;43m--待循环参数 value_list：--\033[0m', value_list, type(value_list))
         new_value_list.append(value_list)
-        print('\033[0;34;43m--待循环参数 new_list：--\033[0m', new_value_list, type(new_value_list))
         count_list.append(count)
         count += split_count
-    return new_value_list, count_list,keys_list
+    return new_value_list, count_list, keys_list
 
 
-def work1(new_list, count_list,keyslist):
+def work1(new_list, count_list, keyslist):
     # sleep_time = random.randint(1, 5)  # 1~2 的随机沉睡时间
     # print('\033[0;33;40m\t1~5 的随机沉睡时间，当前为：\033[0m',sleep_time)
     print(f'当前获取列表的数据为： {new_list},线程名称：{threading.current_thread().name}')
     # print(f'当前获取列表的数据为： {df},\t沉睡时间： {sleep_time},list is {_list},线程名称：{threading.current_thread().name}')
     # time.sleep(sleep_time)
-    print('\033[0;34;40m--待循环参数 new_list：--\033[0m', new_list)
-    print('\033[0;34;40m--待循环参数 count_list：--\033[0m', count_list)
-    print('\033[0;34;40m--待循环参数 keyslist：--\033[0m', keyslist)
+    print('\033[0;34;40m--待循环参数 new_list：--\033[0m', new_list, '\033[0;34;40m--count_list：--\033[0m', count_list)
     keyslist1 = tuple(keyslist)[0]
-    print('\033[0;34;40m--待循环参数 keyslist_1：--\033[0m', keyslist1)
-
-    param_str = '{' + ",".join('"' + str(keyslist1[n] + '":"' + str(new_list[0][n]) + '"') for n in range(len(keyslist1))) + '}'
+    print('\033[0;34;40m--待循环参数 取第一位数据 keyslist_1：--\033[0m', keyslist1)
+    param_str = '{' + ",".join(
+        '"' + str(keyslist1[n] + '":"' + str(new_list[0][n]) + '"') for n in range(len(keyslist1))) + '}'
     print('\033[0;34;40m--param_str：--\033[0m', param_str)
     gateway(url, appKey, appSecret, eval(param_str), create_name, table_comment)
     return sleep_time, new_list, count_list
@@ -63,19 +59,14 @@ def work1(new_list, count_list,keyslist):
 
 def threadPool_new(valuesList, keyslist):
     with ThreadPoolExecutor(max_workers=pool_num) as pool:
-        print('\033[0;34;40m--待循环参数 keyslist：--\033[0m', keyslist)
-        print('\033[0;34;40m--待循环参数 valuesList：--\033[0m', valuesList)
-        new_list, count_list,keys_list = split_list(valuesList,keyslist)
-        # map返回一个迭代器，其中的回调函数的参数 最好是可以迭代的数据类型，如list；如果有 多个参数 则 多个参数的 数据长度相同；
-        # 如： pool.map(work,[[1,2],[3,4]],[0,1]]) 中 [1,2]对应0 ；[3,4]对应1 ；其实内部执行的函数为 work([1,2],0) ; work([3,4],1)
-        # map返回的结果 是 有序结果；是根据迭代函数执行顺序返回的结果
+        print('\033[0;34;40m--待循环参数 keyslist：--\033[0m', keyslist, '\033[0;34;40m--待循环参数 valuesList：--\033[0m',
+              valuesList)
+        new_list, count_list, keys_list = split_list(valuesList, keyslist)
         # 使用map的优点是 每次调用回调函数的结果不用手动的放入结果list中
-        results = pool.map(work1, new_list, count_list,keys_list)
+        results = pool.map(work1, new_list, count_list, keys_list)
         print(type(results))
-        # 如下2行 会等待线程任务执行结束后 再执行其他代码
-        # for ret in results:
-        #     print(ret)
         print('thread execute end!')
+
 
 # MD5 数据加工
 def str_md5(str=''):
@@ -314,7 +305,7 @@ def ApiBatchRetained_select(url, appKey, appSecret, loop_table_name, create_name
         # 执行SQL语句
         cursor.execute(select_loop_info)
         # 返回查询结果
-        param_list = cursor.fetchmany(1000)  # 指定循环次数
+        param_list = cursor.fetchmany(10000)  # 指定循环次数
         # param_list = cursor.fetchall()
         print('\033[0;34;40m--待循环参数：--\033[0m', param_list)
         print('params++++++++', params)
@@ -325,14 +316,6 @@ def ApiBatchRetained_select(url, appKey, appSecret, loop_table_name, create_name
         keysDict = []
         keysDict.append(params)
         threadPool_new(list(param_list), list(keysDict))
-
-        # # 传参、调用接口
-        # for i in range(len(param_list)):
-        #     print('paramsssss:',params)
-        #     param_str = '{' + ",".join(
-        #         '"' + str(params[n] + '":"' + str(param_list[i][n]) + '"') for n in range(len(params))) + '}'
-        #     print('param_strssss：',param_str)
-        # gateway(url, appKey, appSecret, eval(param_str), create_name, table_comment)
     except pymysql.Error as e:
         print("数据库连接失败：" + str(e))
     finally:
