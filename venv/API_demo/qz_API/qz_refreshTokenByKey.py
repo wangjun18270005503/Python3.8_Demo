@@ -28,8 +28,10 @@ def str_md5(str=''):
     return md.hexdigest()
 
 
+
 # 定义方法传参形式
 def refreshTokenByKey(url, appKey, appSecret):
+
     # 打印参数信息
     print('url：' + url + '\nappKey：' + appKey + '\nappSecret：' + appSecret)
     # todo 准备参数
