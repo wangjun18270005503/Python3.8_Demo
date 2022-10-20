@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*- 
 # @Project : Git_Python3.8_Demo 
-# @Time : 2022/10/14 9:19 
+# @Time : 2022/10/17 17:19 
 # @Author : J.wang 
 # @Version: V 0.1 
-# @File : js_Template.py
+# @File : sdyl_js_cjr_jsshhxx.py
 # @Software: PyCharm
-# @desc : 江山市 县级公共数据平台接口 调用模板
+# @desc :模拟真实 刷调用量 江山公共数据平台类型接口 残疾人项目 江山市火化信息
+
 
 '''
 实现思路：
@@ -20,12 +21,13 @@ import redis, requests, pymysql, datetime
 import json, random, hashlib
 import time
 import pandas as pd
+
 requests.packages.urllib3.disable_warnings()
 pymysql.install_as_MySQLdb()
 from sqlalchemy import create_engine
 
 # 连接 redis
-r = redis.Redis(host='localhost', port=6379, db=14, decode_responses=True)
+r = redis.Redis(host='10.27.235.199', port=9004, db=15, password='sx123456', decode_responses=True)
 requestTime = str(int(time.time() * 1000))
 # 公共资源
 db_url = 'mysql://jsggsj:M^*fgp&x@10.27.170.42:33086/xxzhcs?charset=utf8'
@@ -83,12 +85,13 @@ def gateway(url, appKey, appSecret, key_name):
     # 获取 sign
     sign_r = create_sign(appKey, r.get(key_name + "_sign_js"))
     # 获取随机 sfzh
-    select_sql = "SELECT id_card FROM `js_population_info` LIMIT " + str(random.randint(1, 620000)) + ",1"
+    select_sql = "SELECT id_card FROM `js_population_info` WHERE  id_card IS NOT NULL AND death_time IS NOT NULL LIMIT " + str(
+        random.randint(1, 10000)) + ",1"
     db = create_engine(db_url)
-    sfzh_df = pd.read_sql(select_sql, db)
-    sfzh_list = sfzh_df['id_card'].to_list()
-    if len(sfzh_list) != 0:
-        data = {"sfzh": sfzh_list[0]}
+    id_card_df = pd.read_sql(select_sql, db)
+    id_card_list = id_card_df['id_card'].to_list()
+    if len(id_card_list) != 0:
+        data = {"id_card": id_card_list[0]}
         print(data)
         # 组合参数
         url = url + 'requestTime=' + requestTime + '&appkey=' + appKey + '&sign=' + sign_r
@@ -106,7 +109,6 @@ def Simulate_reality(url, appKey, appSecret, key_name):
     print('\033[0;34;40m 开始模拟真实生产平台人员请求 。。。 \033[0m')
     c_time = time.strftime("%H:%M:%S", time.localtime())  # 将本地时间转换为字符串，并格式化为 时：分：秒
     if c_time[3:5] == '00':  # 判断截取分钟是否为0
-        # 若真想是准时的整时整分整秒，则放开此出
         # if c_time[6:8] == '00':  # 判断截取秒是否为0
         print('现在为整点:' + c_time)
         # 生成 随机运行时间点存放至 redis
@@ -114,9 +116,9 @@ def Simulate_reality(url, appKey, appSecret, key_name):
         ran_list = json.dumps(ran_list)
         print(ran_list)
         # 执行时间点存放至 redis
-        r.set(key_name + "_minute_point_J2eVaMeid482W6F8", ran_list)
+        r.set(key_name + "_minute_point_huohuaxinxichaxun_bianpai", ran_list)
     now_minute = time.strftime("%M", time.localtime())
-    minute_list = json.loads(r.get(key_name + "_minute_point_J2eVaMeid482W6F8"))
+    minute_list = json.loads(r.get(key_name + "_minute_point_huohuaxinxichaxun_bianpai"))
     print(minute_list)
     # 判别当前时间与
     for i in iter(minute_list):
@@ -130,7 +132,7 @@ if __name__ == '__main__':
     startTime = datetime.datetime.now()
     print('\033[0;33;40m Program starts running 。。。 \033[0m')
 
-    url = 'https://10.27.168.100:9443/J2eVaMeid482W6F8/bp?'
+    url = 'https://10.27.168.100:9443/huohuaxinxichaxun_bianpai?'
     appKey = 'KeLJJ9hyj2e6eQwtIxHp'
     appSecret = 'rPStGHZpmGh9Ah8uMZ8V'
     key_name = 'cjr'

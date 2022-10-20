@@ -1,31 +1,32 @@
 # -*- coding: utf-8 -*- 
 # @Project : Git_Python3.8_Demo 
-# @Time : 2022/10/14 9:19 
+# @Time : 2022/10/17 17:14 
 # @Author : J.wang 
 # @Version: V 0.1 
-# @File : js_Template.py
+# @File : sdyl_js_cjr_jssgsjyyzzxx.py
 # @Software: PyCharm
-# @desc : 江山市 县级公共数据平台接口 调用模板
+# @desc :模拟真实 刷调用量 江山公共数据平台类型接口 残疾人项目 江山市工商局营业执照信息
 
 '''
 实现思路：
  1、脚本启用定时调度，每分钟执行一次。
  2、在main方法中，每次执行时判断当前时间为整点时间，若当前时间是整点，则系统生成在0~59的0~10个随机数存放在redis/MySQL 中。
  3、在main方法中，每次调度执行时，判断一下当前执行时间为第几分钟，看看是否包含在redis/MySQL中随机生成的数组中。若是包含则进行实际的接口调用，若是不包含则不执行真实的接口调用。
- 4、在MySQL中准备一张人口信息表（公民身份证号码）。
- 5、在调用接口时：身份证入参取人口信息表中随机进行提取，可使用分页查询的方式，每页一条，使用随机数（大小依数据量确定0~*）生成随机页。
+ 4、在MySQL中准备一张江山市工企业信息表（统一社会信用代码）。
+ 5、在调用接口时：统一社会信用代码入参取江山市工企业信息表中随机进行提取，可使用分页查询的方式，每页一条，使用随机数（大小依数据量确定0~*）生成随机页。
 '''
 
 import redis, requests, pymysql, datetime
 import json, random, hashlib
 import time
 import pandas as pd
+
 requests.packages.urllib3.disable_warnings()
 pymysql.install_as_MySQLdb()
 from sqlalchemy import create_engine
 
 # 连接 redis
-r = redis.Redis(host='localhost', port=6379, db=14, decode_responses=True)
+r = redis.Redis(host='10.27.235.199', port=9004, db=15, password='sx123456', decode_responses=True)
 requestTime = str(int(time.time() * 1000))
 # 公共资源
 db_url = 'mysql://jsggsj:M^*fgp&x@10.27.170.42:33086/xxzhcs?charset=utf8'
@@ -83,12 +84,13 @@ def gateway(url, appKey, appSecret, key_name):
     # 获取 sign
     sign_r = create_sign(appKey, r.get(key_name + "_sign_js"))
     # 获取随机 sfzh
-    select_sql = "SELECT id_card FROM `js_population_info` LIMIT " + str(random.randint(1, 620000)) + ",1"
+    select_sql = "SELECT tyshxydm FROM `warehouse_company_basicinfo` WHERE tyshxydm REGEXP '^([1-9ANY][1-59][1-9][0-9]{5}[0-9A-HJ-NPQRTUWXY]{10}|[1-9][0-9]{14})$' LIMIT " + str(
+        random.randint(1, 60000)) + ",1"
     db = create_engine(db_url)
-    sfzh_df = pd.read_sql(select_sql, db)
-    sfzh_list = sfzh_df['id_card'].to_list()
-    if len(sfzh_list) != 0:
-        data = {"sfzh": sfzh_list[0]}
+    uniscid_df = pd.read_sql(select_sql, db)
+    uniscid_list = uniscid_df['tyshxydm'].to_list()
+    if len(uniscid_list) != 0:
+        data = {"uniscid": uniscid_list[0]}
         print(data)
         # 组合参数
         url = url + 'requestTime=' + requestTime + '&appkey=' + appKey + '&sign=' + sign_r
@@ -106,7 +108,6 @@ def Simulate_reality(url, appKey, appSecret, key_name):
     print('\033[0;34;40m 开始模拟真实生产平台人员请求 。。。 \033[0m')
     c_time = time.strftime("%H:%M:%S", time.localtime())  # 将本地时间转换为字符串，并格式化为 时：分：秒
     if c_time[3:5] == '00':  # 判断截取分钟是否为0
-        # 若真想是准时的整时整分整秒，则放开此出
         # if c_time[6:8] == '00':  # 判断截取秒是否为0
         print('现在为整点:' + c_time)
         # 生成 随机运行时间点存放至 redis
@@ -114,9 +115,9 @@ def Simulate_reality(url, appKey, appSecret, key_name):
         ran_list = json.dumps(ran_list)
         print(ran_list)
         # 执行时间点存放至 redis
-        r.set(key_name + "_minute_point_J2eVaMeid482W6F8", ran_list)
+        r.set(key_name + "_minute_point_4Y703b3aKe46qtM7", ran_list)
     now_minute = time.strftime("%M", time.localtime())
-    minute_list = json.loads(r.get(key_name + "_minute_point_J2eVaMeid482W6F8"))
+    minute_list = json.loads(r.get(key_name + "_minute_point_4Y703b3aKe46qtM7"))
     print(minute_list)
     # 判别当前时间与
     for i in iter(minute_list):
@@ -130,7 +131,7 @@ if __name__ == '__main__':
     startTime = datetime.datetime.now()
     print('\033[0;33;40m Program starts running 。。。 \033[0m')
 
-    url = 'https://10.27.168.100:9443/J2eVaMeid482W6F8/bp?'
+    url = 'https://10.27.168.100:9443/4Y703b3aKe46qtM7/bp?'
     appKey = 'KeLJJ9hyj2e6eQwtIxHp'
     appSecret = 'rPStGHZpmGh9Ah8uMZ8V'
     key_name = 'cjr'

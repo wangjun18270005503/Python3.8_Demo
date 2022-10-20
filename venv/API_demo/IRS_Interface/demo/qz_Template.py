@@ -5,4 +5,127 @@
 # @Version: V 0.1 
 # @File : qz_Template.py
 # @Software: PyCharm
-# @desc :
+# @desc : 衢州市 市级公共数据平台接口 调用模板
+'''
+实现思路：
+ 1、脚本启用定时调度，每分钟执行一次。
+ 2、在main方法中，每次执行时判断当前时间为整点时间，若当前时间是整点，则系统生成在0~59的0~10个随机数存放在redis/MySQL 中。
+ 3、在main方法中，每次调度执行时，判断一下当前执行时间为第几分钟，看看是否包含在redis/MySQL中随机生成的数组中。若是包含则进行实际的接口调用，若是不包含则不执行真实的接口调用。
+ 4、在MySQL中准备一张人口信息表（公民身份证号码）。
+ 5、在调用接口时：身份证入参取人口信息表中随机进行提取，可使用分页查询的方式，每页一条，使用随机数（大小依数据量确定0~*）生成随机页。
+'''
+
+import redis, requests, pymysql, datetime
+import json, random, hashlib
+import time
+import pandas as pd
+
+pymysql.install_as_MySQLdb()
+from sqlalchemy import create_engine
+
+# 连接 redis
+r = redis.Redis(host='localhost', port=6379, db=14, decode_responses=True)
+requestTime = str(int(time.time() * 1000))
+# 公共资源
+db_url = 'mysql://jsggsj:M^*fgp&x@10.27.170.42:33086/xxzhcs?charset=utf8'
+
+
+# todo sign 前面生成
+def create_sign(ak, sk):
+    print('开始生成 sign')
+    str = ak + sk + requestTime
+    sign = hashlib.md5()
+    sign.update(str.encode("utf-8"))
+    return sign.hexdigest()
+
+
+# todo (1)刷新密钥
+def refresh_token_by_key(appKey, appSecret):
+    print("开始《刷新密钥》")
+    # 获取 sign
+    key_sign = create_sign(appKey, appSecret)
+    # 组合参数
+    url = 'http://dw.qz.gov.cn/gateway/app/refreshTokenByKey.htm?'
+    url = url + 'requestTime=' + requestTime + '&appKey=' + appKey + '&sign=' + key_sign
+    response = requests.post(url)
+    print(response.text)
+    return response.json()['datas']['refreshSecret']
+
+
+# todo (2)请求密钥
+def refresh_token_by_sec(appKey, appSecret, key_name):
+    print("开始《请求密钥》")
+    # 获取 sign
+    refreshSecret = refresh_token_by_key(appKey, appSecret)
+    sec_sign = create_sign(appKey, refreshSecret)
+    # 组合参数
+    url = 'http://dw.qz.gov.cn/gateway/app/refreshTokenBySec.htm?'
+    url = url + 'requestTime=' + requestTime + '&appKey=' + appKey + '&sign=' + sec_sign
+    response = requests.post(url)
+    requestSecret = response.json()['datas']['requestSecret']
+    r.set(key_name + "_sign_qz", requestSecret)
+    return requestSecret
+
+
+# todo (3)业务接口
+def gateway(url, appKey, appSecret, key_name):
+    print("开始《业务接口》")
+    # 获取 sign
+    sign_r = create_sign(appKey, r.get(key_name + "_sign_qz"))
+    # 获取随机 sfzh
+    select_sql = "SELECT id_card FROM `js_population_info` LIMIT " + str(random.randint(1, 620000)) + ",1"
+    db = create_engine(db_url)
+    sfzh_df = pd.read_sql(select_sql, db)
+    sfzh_list = sfzh_df['id_card'].to_list()
+    if len(sfzh_list) != 0:
+        sfzh = sfzh_list[0]
+        # 组合参数
+        url = url + 'requestTime=' + requestTime + '&appKey=' + appKey + '&sign=' + sign_r + '&cardId=' + sfzh
+        print(url)
+        response = requests.post(url)
+        print(response.text)
+        if response.json()['code'] == '02' or response.json()['code'] == '11':
+            refresh_token_by_sec(appKey, appSecret, key_name)
+
+
+# todo (4)模拟真实
+def Simulate_reality(url, appKey, appSecret, key_name):
+    print('\033[0;34;40m 开始模拟真实生产平台人员请求 。。。 \033[0m')
+    c_time = time.strftime("%H:%M:%S", time.localtime())  # 将本地时间转换为字符串，并格式化为 时：分：秒
+    if c_time[3:5] == '00':  # 判断截取分钟是否为0
+        # 若真想是准时的整时整分整秒，则放开此出
+        # if c_time[6:8] == '00':  # 判断截取秒是否为0
+        print('现在为整点:' + c_time)
+        # 生成 随机运行时间点存放至 redis
+        ran_list = random.sample(range(0, 59), random.randint(0, 20))
+        ran_list = json.dumps(ran_list)
+        print(ran_list)
+        # 执行时间点存放至 redis
+        r.set(key_name + "_minute_point_p6b45bR28ejPr6z3", ran_list)
+    now_minute = time.strftime("%M", time.localtime())
+    minute_list = json.loads(r.get(key_name + "_minute_point_p6b45bR28ejPr6z3"))
+    print(minute_list)
+    # 判别当前时间与
+    for i in iter(minute_list):
+        if i == int(now_minute):
+            # 发送请求
+            gateway(url, appKey, appSecret, key_name)
+
+
+if __name__ == '__main__':
+    # todo 1 程序开始时间
+    startTime = datetime.datetime.now()
+    print('\033[0;33;40m Program starts running 。。。 \033[0m')
+
+    url = 'http://dw.qz.gov.cn/gateway/api/001008013008001/dataSharing/p6b45bR28ejPr6z3.htm?'
+    appKey = '46eb7734001641048cd20cf15f18610a'
+    appSecret = '31b4020cd1c6419bb48bd27e6b239282'
+    key_name = 'szhgg'
+    # todo 2 启动调用程序
+    Simulate_reality(url, appKey, appSecret, key_name)
+    # refresh_token_by_sec(appKey, appSecret, key_name)
+    # todo 3 程序结束时间 并输出总耗时
+    endTime = datetime.datetime.now()
+    durTime = '\033[0;33;40m funtion time use:%dms \033[0m' % (
+            (endTime - startTime).seconds * 1000 + (endTime - startTime).microseconds / 1000)
+    print(durTime)
