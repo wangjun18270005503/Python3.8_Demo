@@ -3,7 +3,7 @@
 # @Author : J.wang 
 # @File : py_thread.py
 '''
-    线程——demo
+    线程——Template
     使用线程池来执行线程任务的步骤如下：
         1、调用 ThreadPoolExecutor 类的构造器创建一个线程池。
         2、定义一个普通函数作为线程任务。

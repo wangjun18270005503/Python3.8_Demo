@@ -74,12 +74,12 @@ hkruppa@inf.ethz.ch
 
 ADDITIONAL INFORMATION 
 ====================== 
-Check out the demo movie, e.g. using mplayer or any (Windows/Linux-) player
+Check out the Template movie, e.g. using mplayer or any (Windows/Linux-) player
 that can play back .mpg movies.
 Under Linux that's:
-> ffplay demo.mpg
+> ffplay Template.mpg
 or:
-> mplayer demo.mpg
+> mplayer Template.mpg
 
 The movie shows a person walking towards the camera in a realistic
 indoor setting. Using ffplay or mplayer you can pause and continue the
@@ -134,7 +134,7 @@ KNOWN LIMITATIONS
 
 Acknowledgements
 ================
-Thanks to Martin Spengler, ETH Zurich, for providing the demo movie.
+Thanks to Martin Spengler, ETH Zurich, for providing the Template movie.
 -->
 <opencv_storage>
 <cascade type_id="opencv-cascade-classifier"><stageType>BOOST</stageType>
