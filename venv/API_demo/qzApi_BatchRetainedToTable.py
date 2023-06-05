@@ -249,7 +249,7 @@ def ApiBatchRetained_select(url, appKey, appSecret, loop_table_name, create_name
     param = ",".join(str(params[n]) for n in range(len(params)))
     print('param：' + param)
     try:
-        db = pymysql.Connect(host='10.27.166.210', user='xxzhcs', password='Xxzhcs1234', port=3306,
+        db = pymysql.Connect(host='**.**.**.210', user='x*z*x*', password='X*z*c*1234', port=3306,
                              database='sx_data_share')
         # 使用cursor()方法获取操作游标
         cursor = db.cursor()

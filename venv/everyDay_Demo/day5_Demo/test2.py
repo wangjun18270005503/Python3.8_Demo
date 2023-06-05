@@ -5,7 +5,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 #sx_local_govern_test
 def local():
-    db = pymysql.connect(host='10.27.166.210', port=3306, user='xxzhcs', password='Xxzhcs1234', db='sx_local_govern_test')
+    db = pymysql.connect(host='**.**.**.210', port=3306, user='x*z*x*', password='X*z*c*1234', db='sx_local_govern_test')
     sql = "SELECT table_name as table_name,'' as count, table_comment as table_comment \
     FROM information_schema.tables \
     WHERE table_schema = 'sx_local_govern_test'and table_name not like '%copy' and table_name not like '%_bak' and table_name like 'local_%' "

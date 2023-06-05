@@ -11,7 +11,7 @@ import redis
 
 
 # 连接 redis
-r = redis.Redis(host='10.50.207.215', port=6379, db=6, password='sx123456', decode_responses=True)
+r = redis.Redis(host='10.50.207.215', port=6379, db=6, password='sx1~&~6', decode_responses=True)
 # 取出redis中的auth：
 auth = r['access_token']
 # print auth

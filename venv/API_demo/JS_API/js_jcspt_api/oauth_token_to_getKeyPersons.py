@@ -13,7 +13,7 @@ appkey = 'MBMAWSCLUWYWBAAKMQEH'
 username = 'Azdry01@qzsg'
 password = 'afdd0b4ad2ec172c586e2150770fbf9e'
 # 连接redis:
-r = redis.Redis(host='10.50.207.215', port=6379, db=6, password='sx123456', decode_responses=True)
+r = redis.Redis(host='10.50.207.215', port=6379, db=6, password='sx1~&~6', decode_responses=True)
 auth = r['access_token']
 print('\033[5;35;40m\t当前登录验证token \033[0m：', auth)
 

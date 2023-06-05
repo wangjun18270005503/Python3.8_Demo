@@ -28,7 +28,7 @@ from sqlalchemy import create_engine
 r = redis.Redis(host='localhost', port=6379, db=14, decode_responses=True)
 requestTime = str(int(time.time() * 1000))
 # 公共资源
-db_url = 'mysql://jsggsj:M^*fgp&x@10.27.170.42:33086/xxzhcs?charset=utf8'
+db_url = 'mysql://**:**@**.**.**.42:****/x*z*x*?charset=utf8'
 
 
 # todo sign 前面生成
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     startTime = datetime.datetime.now()
     print('\033[0;33;40m Program starts running 。。。 \033[0m')
 
-    url = 'https://10.27.168.100:9443/J2eVaMeid482W6F8/bp?'
+    url = 'https://**.**.*68.100:9443/J2eVaMeid482W6F8/bp?'
     appKey = 'KeLJJ9hyj2e6eQwtIxHp'
     appSecret = 'rPStGHZpmGh9Ah8uMZ8V'
     key_name = 'cjr'

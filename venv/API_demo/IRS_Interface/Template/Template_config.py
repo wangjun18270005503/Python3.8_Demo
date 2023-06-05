@@ -9,7 +9,7 @@
 '''
 （1）、经过分析由于申请的接口调用方式，入参形式、各层级签名类似，为避免大量重复代码工作。
 （2）、将调用接口所需的 Ak、SK、接口url、入参封装、sign组名定义、接口分钟组名定义、签名异常校验code 等相关信息已配置形式配置
-（3）、配置存放至 10.27.170.42中的xxzhcs数据库的 sys_sdyl_js_projtect_config：江山市IRS应用接口刷调用量_配置表 下面
+（3）、配置存放至 **.**.**.42中的x*z*x*数据库的 sys_sdyl_js_projtect_config：江山市IRS应用接口刷调用量_配置表 下面
 （4）、解析江山市IRS应用接口刷调用量_配置表中的配置信息，实现封装随机接口调用形式。
 '''
 
@@ -20,13 +20,13 @@ import pandas as pd
 
 requests.packages.urllib3.disable_warnings()
 pymysql.install_as_MySQLdb()
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 # 连接 redis
-r = redis.Redis(host='10.27.235.199', port=9004, db=15, password='sx123456', decode_responses=True)
+r = redis.Redis(host='**.**.*35.199', port=9004, db=15, password='sx1~&~6', decode_responses=True)
 requestTime = str(int(time.time() * 1000))
 # 公共资源
-db_url = 'mysql://jsggsj:M^*fgp&x@10.27.170.42:33086/xxzhcs?charset=utf8'
+db_url = 'mysql://**:**@**.**.**.42:****/x*z*x*?charset=utf8'
 
 
 # todo sign 前面生成
@@ -137,31 +137,59 @@ def gateway(config_dict):
     sign_r = create_sign(config_dict['app_key'],
                          r.get(config_dict['sing_name'] + "_sign_" + config_dict['interface_level']))
     db = create_engine(db_url)
-    body_df = pd.read_sql(config_dict['select_sql'], db)
-    body_list = body_df.to_dict('records')
-    if len(body_list) != 0:
-        body = body_list[0]
-        # 组合参数
-        appk_name = ''
-        if config_dict['interface_level'] == 'js':
-            appk_name = '&appkey='
-            body = json.dumps(body)
-        else:
-            appk_name = '&appKey='
-        url = config_dict['interface_url'] + 'requestTime=' + requestTime + appk_name + config_dict[
-            'app_key'] + '&sign=' + sign_r
-        print(url)
-        print(body)
-        response = requests.post(url, data=body, verify=False)
-        print(response.text)
+    # 省市 适配 区县 参数
+    appk_name = ''
+    if config_dict['interface_level'] == 'js':
+        appk_name = '&appkey='
+    else:
+        appk_name = '&appKey='
+    url = config_dict['interface_url'] + 'requestTime=' + requestTime + appk_name + config_dict[
+        'app_key'] + '&sign=' + sign_r
+    body_df = pd.read_sql(text(config_dict['select_sql']), db)
+    # 写入日志 表
+    insert_pd = pd.DataFrame(
+        columns=['project_name', 'app_key', 'app_secret', 'interface_name', 'interface_level','request_mode', 'res_info', 'req_info'],
+        index=["0"])
+    insert_pd['project_name'] = config_dict['project_name']
+    insert_pd['app_key'] = config_dict['app_key']
+    insert_pd['app_secret'] = config_dict['app_secret']
+    insert_pd['interface_name'] = config_dict['interface_name']
+    insert_pd['interface_level'] = config_dict['interface_level']
+    insert_pd['request_mode'] = config_dict['request_mode']
 
-        if response.status_code != 200:
-            if config_dict['interface_level'] == 'zj':
-                refresh_token_by_sec_zj(config_dict)
-            if config_dict['interface_level'] == 'qz':
-                refresh_token_by_sec_qz(config_dict)
-            if config_dict['interface_level'] == 'js':
-                refresh_token_by_sec_js(config_dict)
+    if config_dict['request_mode'] == 'GET':
+        print("GET")
+        params = ''
+        columns = body_df.columns
+        body_list = body_df.values[0]
+        for i in range(len(body_list)):
+            params = params + '&' + columns[i] + '=' + body_list[i]
+        url = url + params
+        print(url)
+        response = requests.get(url)
+        insert_pd['req_info'] = url
+    else:
+        body_list = body_df.to_dict('records')
+        if len(body_list) != 0:
+            body = body_list[0]
+        print(body)
+        print(url)
+        body = json.dumps(body)
+        response = requests.post(url, data=body, verify=False)
+        insert_pd['req_info'] = body
+
+    insert_pd['res_info'] = response.text
+    insert_pd.to_sql('sys_sdyl_js_projtect_log', con=db, if_exists='append', index=False)
+    print(insert_pd)
+    print(response.text)
+
+    if '秘钥' in response.text or response.status_code != 200:
+        if config_dict['interface_level'] == 'zj':
+            refresh_token_by_sec_zj(config_dict)
+        if config_dict['interface_level'] == 'qz':
+            refresh_token_by_sec_qz(config_dict)
+        if config_dict['interface_level'] == 'js':
+            refresh_token_by_sec_js(config_dict)
 
 
 # todo (4)模拟真实
@@ -174,7 +202,8 @@ def Simulate_reality(config_dict):
         # if c_time[6:8] == '00':  # 判断截取秒是否为0
         print('现在为整点:' + c_time)
         # 生成 随机运行时间点存放至 redis
-        ran_list = random.sample(range(0, 59), random.randint(0, 20))
+        ran_list = random.sample(range(0, 59), random.randint(int(config_dict['random_start_num']),
+                                                              int(config_dict['random_end_num'])))
         ran_list = json.dumps(ran_list)
         print(ran_list)
         # 执行时间点存放至 redis
@@ -191,7 +220,7 @@ def Simulate_reality(config_dict):
 
 # 获取配置详情
 def get_config_info():
-    sql_str = " SELECT project_name,app_key,app_secret,interface_name,interface_url,interface_level,select_sql,sing_name,minute_name,res_code FROM `sys_sdyl_js_projtect_config` WHERE del_flag = 0 AND task_code = '2';";
+    sql_str = "SELECT project_name,app_key,app_secret,interface_name,interface_url,interface_level,select_sql,sing_name,minute_name,res_code,request_mode,random_start_num,random_end_num FROM `sys_sdyl_js_projtect_config` WHERE del_flag = 0 AND task_code = '2';"
     db = create_engine(db_url)
     config_list = pd.read_sql(sql_str, db)
     config_dict_list = config_list.to_dict('records')

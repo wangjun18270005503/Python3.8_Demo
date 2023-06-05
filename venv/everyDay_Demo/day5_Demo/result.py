@@ -4,7 +4,7 @@ import datetime
 
 #sx_local_govern_test
 def local():
-    db = pymysql.connect(host='10.27.166.210', port=3306, user='xxzhcs', password='Xxzhcs1234', db='sx_local_govern_test')
+    db = pymysql.connect(host='**.**.**.210', port=3306, user='x*z*x*', password='X*z*c*1234', db='sx_local_govern_test')
     sql = "SELECT table_name as 表名,table_rows as 表数据, table_comment as 名称 \
     FROM information_schema.tables \
     WHERE table_schema = 'sx_local_govern_test'and table_name not like '%copy%' and table_name not like '%_bak%' and table_name like '%local_%'"
@@ -28,7 +28,7 @@ def local():
 
 #jdhg_gyyq
 def js():
-    db = pymysql.connect(host='10.27.166.210', port=3306, user='xxzhcs', password='Xxzhcs1234', db='jdhg_gyyq')
+    db = pymysql.connect(host='**.**.**.210', port=3306, user='x*z*x*', password='X*z*c*1234', db='jdhg_gyyq')
     sql = "SELECT table_name as 表名,table_rows as 表数据, table_comment as 名称 \
     FROM information_schema.tables \
     WHERE table_schema = 'jdhg_gyyq'and table_name not like '%copy%' and table_name not like '%_bak%' and table_name like '%js_%'"
@@ -49,12 +49,12 @@ def js():
     book.save('D:\ js.xlsx')# 保存excel文件
     print("运行完成")
 
-#xxzhcs
+#x*z*x*
 def warehouse():
-    db = pymysql.connect(host='10.27.166.210', port=3306, user='xxzhcs', password='Xxzhcs1234', db='xxzhcs')
+    db = pymysql.connect(host='**.**.**.210', port=3306, user='x*z*x*', password='X*z*c*1234', db='x*z*x*')
     sql = "SELECT table_name as 表名,table_rows as 表数据, table_comment as 名称 \
     FROM information_schema.tables \
-    WHERE table_schema = 'xxzhcs'and table_name not like '%copy%' and table_name not like '%_bak%' and table_name like '%warehouse_%'"
+    WHERE table_schema = 'x*z*x*'and table_name not like '%copy%' and table_name not like '%_bak%' and table_name like '%warehouse_%'"
     cursor = db.cursor()
     cursor.execute(sql)
     fileds = [filed[0] for filed in cursor.description]

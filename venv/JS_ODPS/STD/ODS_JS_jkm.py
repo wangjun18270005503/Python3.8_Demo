@@ -13,5 +13,5 @@ sys.setdefaultencoding("utf8")
 
 o = ODPS('O4iewWeaBFZdywzT', 'wG3L8OwQzENU6B5WbOYPGvkFVRKQfe',
          project='js_szhgg', endpoint='http://service.cn-qz-qzyzx-dt01.odps.qzyzx-ops.com:80/api')
-js_jkm = DataFrame(o.get_table('ods_xxzhcs_js_jkm'))
+js_jkm = DataFrame(o.get_table('ods_x*z*x*_js_jkm'))
 print (js_jkm.head(5))

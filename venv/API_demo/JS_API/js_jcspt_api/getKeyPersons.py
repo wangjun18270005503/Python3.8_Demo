@@ -15,7 +15,7 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 
 # 打开数据库连接_所需监控的表
-govdb = MySQLdb.connect("10.27.166.210", "xxzhcs", "Xxzhcs1234", "sx_local_govern_test",charset='utf8')
+govdb = MySQLdb.connect("**.**.**.210", "x*z*x*", "X*z*c*1234", "sx_local_govern_test",charset='utf8')
 
 # 使用cursor()方法获取操作游标
 govtest_cursor = govdb.cursor()

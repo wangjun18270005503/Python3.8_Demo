@@ -15,10 +15,10 @@ pymysql.install_as_MySQLdb()
 from sqlalchemy import create_engine
 
 # 连接 redis
-r = redis.Redis(host='10.27.235.199', port=9004, db=15, password='sx123456', decode_responses=True)
+r = redis.Redis(host='**.**.*35.199', port=9004, db=15, password='sx1~&~6', decode_responses=True)
 requestTime = str(int(time.time() * 1000))
 # 公共资源
-db_url = 'mysql://jsggsj:M^*fgp&x@10.27.170.42:33086/xxzhcs?charset=utf8'
+db_url = 'mysql://**:**@**.**.**.42:****/x*z*x*?charset=utf8'
 
 
 # todo sign 前面生成
